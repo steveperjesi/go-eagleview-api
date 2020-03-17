@@ -52,9 +52,11 @@ func (client *Client) tokenize() error {
 
 	if client.Token.AccessToken != "" {
 		rightNow := time.Now()
+		tokenTime := client.Token.ExpiresAt
 
-		if client.Token.ExpiresAt.Unix() < rightNow.Unix() {
+		if tokenTime.Unix() > rightNow.Unix() {
 			// We're still valid, move along
+			log.Debug().Interface("TOKENIZE: EXISTING TOKEN STILL VALID").Msg("tokenize")
 			return nil
 		}
 	}
@@ -92,7 +94,7 @@ func (client *Client) tokenize() error {
 
 		defer res.Body.Close()
 
-		log.Debug().Interface("response Refresh Status:", res.Status).Msg("tokenize")
+		log.Debug().Interface("TOKENIZE: USING refresh TOKEN").Msg("tokenize")
 	} else {
 		// No tokens, need to get some
 		if client.InitialRequest.Username == "" {
@@ -125,7 +127,7 @@ func (client *Client) tokenize() error {
 
 		defer res.Body.Close()
 
-		log.Debug().Interface("response Initial Status:", res.Status).Msg("tokenize")
+		log.Debug().Interface("TOKENIZE: GETTING NEW access TOKEN").Msg("tokenize")
 	}
 
 	if res.StatusCode != http.StatusOK {
@@ -205,11 +207,6 @@ func (client *Client) tokenize() error {
 	os.Setenv("EAGLEVIEW_API_ACCESS_TOKEN", client.Token.AccessToken)
 	os.Setenv("EAGLEVIEW_API_REFRESH_TOKEN", client.Token.RefreshToken)
 	os.Setenv("EAGLEVIEW_API_ACCESS_TOKEN_EXPIRES", strconv.Itoa(int(client.Token.ExpiresAt.Unix())))
-
-	// fmt.Println("[***** made it to the bottom! *****]")
-	// fmt.Println("client.Token.AccessToken", client.Token.AccessToken)
-	// fmt.Println("client.Token.RefreshToken", client.Token.RefreshToken)
-	// fmt.Println("client.Token.AccessTokenExpiresAt", client.Token.ExpiresAt)
 
 	return nil
 }

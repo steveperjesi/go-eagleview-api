@@ -56,7 +56,7 @@ func (client *Client) tokenize() error {
 
 		if tokenTime.Unix() > rightNow.Unix() {
 			// We're still valid, move along
-			log.Debug().Interface("TOKENIZE: EXISTING TOKEN STILL VALID").Msg("tokenize")
+			log.Debug().Interface("TOKENIZE: EXISTING TOKEN STILL VALID", tokenTime.Unix()).Msg("tokenize")
 			return nil
 		}
 	}
@@ -94,7 +94,7 @@ func (client *Client) tokenize() error {
 
 		defer res.Body.Close()
 
-		log.Debug().Interface("TOKENIZE: USING refresh TOKEN").Msg("tokenize")
+		log.Debug().Interface("TOKENIZE: USING refresh TOKEN", client.Token.RefreshToken).Msg("tokenize")
 	} else {
 		// No tokens, need to get some
 		if client.InitialRequest.Username == "" {
@@ -127,7 +127,7 @@ func (client *Client) tokenize() error {
 
 		defer res.Body.Close()
 
-		log.Debug().Interface("TOKENIZE: GETTING NEW access TOKEN").Msg("tokenize")
+		log.Debug().Interface("TOKENIZE: GETTING NEW access TOKEN", base64Auth).Msg("tokenize")
 	}
 
 	if res.StatusCode != http.StatusOK {
